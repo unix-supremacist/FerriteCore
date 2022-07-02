@@ -14,12 +14,14 @@ import java.util.Set;
 
 public abstract class FerriteMixinConfig implements IMixinConfigPlugin {
     protected static final Logger LOGGER = LogManager.getLogger("ferritecore-mixin");
+    protected static final boolean HAS_HYDROGEN;
     private static final boolean HAS_LITHIUM;
     private static final boolean HAS_ROADRUNNER;
 
     static {
         HAS_LITHIUM = hasClass("me.jellysquid.mods.lithium.common.LithiumMod");
         HAS_ROADRUNNER = hasClass("me.jellysquid.mods.lithium.common.RoadRunner");
+        HAS_HYDROGEN = hasClass("me.jellysquid.mods.hydrogen.common.HydrogenMod");
     }
 
     private String prefix = null;
@@ -48,7 +50,7 @@ public abstract class FerriteMixinConfig implements IMixinConfigPlugin {
             }
             return false;
         } else if (!this.lithiumState.shouldApply()) {
-            LOGGER.warn("Mixin " + mixinClassName + " is disabled automatically as lithium is installed");
+            LOGGER.warn("Mixin " + mixinClassName + " is disabled automatically as lithium/hydrogen is installed");
             return false;
         } else {
             if (optIn) {
@@ -91,12 +93,14 @@ public abstract class FerriteMixinConfig implements IMixinConfigPlugin {
     protected enum LithiumSupportState {
         NO_CONFLICT,
         INCOMPATIBLE,
+        INCOMPATIBLEHYDROGEN,
         APPLY_IF_ROADRUNNER;
 
         private boolean shouldApply() {
             return switch (this) {
                 case NO_CONFLICT -> true;
                 case INCOMPATIBLE -> !HAS_LITHIUM;
+                case INCOMPATIBLEHYDROGEN -> !HAS_HYDROGEN;
                 case APPLY_IF_ROADRUNNER -> !HAS_LITHIUM || HAS_ROADRUNNER;
             };
         }
